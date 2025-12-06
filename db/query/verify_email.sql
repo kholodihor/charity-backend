@@ -1,0 +1,1 @@
+-- Intentionally left empty: no verify_email-related tables in current schema.

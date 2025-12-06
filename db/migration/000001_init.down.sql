@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS "donations";
+DROP TABLE IF EXISTS "goals";
+DROP TABLE IF EXISTS "users";

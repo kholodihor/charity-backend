@@ -1,0 +1,1 @@
+-- Intentionally left empty: no sessions table in current schema.
