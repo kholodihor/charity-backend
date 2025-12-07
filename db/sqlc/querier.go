@@ -11,12 +11,14 @@ import (
 )
 
 type Querier interface {
+	AddToGoalCollectedAmount(ctx context.Context, arg AddToGoalCollectedAmountParams) (Goal, error)
 	CreateAnonymousDonation(ctx context.Context, arg CreateAnonymousDonationParams) (Donation, error)
 	CreateDonation(ctx context.Context, arg CreateDonationParams) (Donation, error)
 	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetDonation(ctx context.Context, id int64) (Donation, error)
 	GetGoal(ctx context.Context, id int64) (Goal, error)
+	GetGoalForUpdate(ctx context.Context, id int64) (Goal, error)
 	GetGoalTotalDonations(ctx context.Context, goalID int64) (interface{}, error)
 	GetUser(ctx context.Context, id int64) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)

@@ -11,6 +11,33 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addToGoalCollectedAmount = `-- name: AddToGoalCollectedAmount :one
+UPDATE goals
+SET collected_amount = collected_amount + $1
+WHERE id = $2
+RETURNING id, title, description, target_amount, collected_amount, is_active, created_at
+`
+
+type AddToGoalCollectedAmountParams struct {
+	Amount int64 `json:"amount"`
+	ID     int64 `json:"id"`
+}
+
+func (q *Queries) AddToGoalCollectedAmount(ctx context.Context, arg AddToGoalCollectedAmountParams) (Goal, error) {
+	row := q.db.QueryRow(ctx, addToGoalCollectedAmount, arg.Amount, arg.ID)
+	var i Goal
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.TargetAmount,
+		&i.CollectedAmount,
+		&i.IsActive,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createGoal = `-- name: CreateGoal :one
 INSERT INTO goals (
   title,
@@ -49,6 +76,27 @@ WHERE id = $1 LIMIT 1
 
 func (q *Queries) GetGoal(ctx context.Context, id int64) (Goal, error) {
 	row := q.db.QueryRow(ctx, getGoal, id)
+	var i Goal
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.TargetAmount,
+		&i.CollectedAmount,
+		&i.IsActive,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getGoalForUpdate = `-- name: GetGoalForUpdate :one
+SELECT id, title, description, target_amount, collected_amount, is_active, created_at FROM goals
+WHERE id = $1
+FOR UPDATE
+`
+
+func (q *Queries) GetGoalForUpdate(ctx context.Context, id int64) (Goal, error) {
+	row := q.db.QueryRow(ctx, getGoalForUpdate, id)
 	var i Goal
 	err := row.Scan(
 		&i.ID,

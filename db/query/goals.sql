@@ -33,3 +33,14 @@ SET
   is_active = COALESCE(sqlc.narg(is_active), is_active)
 WHERE id = sqlc.arg(id)
 RETURNING *;
+
+-- name: GetGoalForUpdate :one
+SELECT * FROM goals
+WHERE id = sqlc.arg(id)
+FOR UPDATE;
+
+-- name: AddToGoalCollectedAmount :one
+UPDATE goals
+SET collected_amount = collected_amount + sqlc.arg(amount)
+WHERE id = sqlc.arg(id)
+RETURNING *;
