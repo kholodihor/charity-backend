@@ -14,17 +14,13 @@ import (
 )
 
 func (s *Server) createDonation(c *gin.Context) {
-	type request struct {
-		UserID      int64  `json:"user_id"`
-		GoalID      int64  `json:"goal_id"`
-		Amount      int64  `json:"amount"`
-		Currency    string `json:"currency"`
-		IsAnonymous bool   `json:"is_anonymous"`
-	}
-
-	var req request
+	var req createDonationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+	if err := validateCreateDonationRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

@@ -75,23 +75,13 @@ func (s *Server) getGoal(c *gin.Context) {
 }
 
 func (s *Server) createGoal(c *gin.Context) {
-	type request struct {
-		Title        string  `json:"title"`
-		Description  *string `json:"description"`
-		TargetAmount int64   `json:"target_amount"`
-	}
-
-	var req request
+	var req createGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
-	if req.Title == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "title is required"})
-		return
-	}
-	if req.TargetAmount <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "target_amount must be positive"})
+	if err := validateCreateGoalRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -127,16 +117,13 @@ func (s *Server) updateGoal(c *gin.Context) {
 		return
 	}
 
-	type request struct {
-		Title        *string `json:"title"`
-		Description  *string `json:"description"`
-		TargetAmount *int64  `json:"target_amount"`
-		IsActive     *bool   `json:"is_active"`
-	}
-
-	var req request
+	var req updateGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+	if err := validateUpdateGoalRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
