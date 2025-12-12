@@ -2,7 +2,7 @@ CREATE TABLE "users" (
   "id" bigserial PRIMARY KEY,
   "email" varchar UNIQUE NOT NULL,
   "name" varchar,
-  "password" varchar,
+  "password" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT 'now()'
 );
 

@@ -8,6 +8,7 @@ import (
 	"charity/api"
 	"charity/config"
 	db "charity/db/sqlc"
+	"charity/token"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -28,7 +29,13 @@ func main() {
 	defer conn.Close(context.Background())
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+
+	tokenMaker, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
+	if err != nil {
+		log.Fatalf("cannot create token maker: %v", err)
+	}
+
+	server := api.NewServer(store, tokenMaker, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 
 	if err := server.Start(cfg.ServerAddress); err != nil {
 		log.Fatalf("cannot start server: %v", err)

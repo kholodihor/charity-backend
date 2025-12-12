@@ -25,6 +25,37 @@ type createDonationRequest struct {
 	IsAnonymous bool   `json:"is_anonymous"`
 }
 
+type createUserRequest struct {
+	Email    string  `json:"email"`
+	Name     *string `json:"name"`
+	Password string  `json:"password"`
+}
+
+func validateCreateUserRequest(req createUserRequest) error {
+	if req.Email == "" {
+		return fmt.Errorf("email is required")
+	}
+	if req.Password == "" {
+		return fmt.Errorf("password is required")
+	}
+	return nil
+}
+
+type loginUserRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func validateLoginUserRequest(req loginUserRequest) error {
+	if req.Email == "" {
+		return fmt.Errorf("email is required")
+	}
+	if req.Password == "" {
+		return fmt.Errorf("password is required")
+	}
+	return nil
+}
+
 func validateCreateGoalRequest(req createGoalRequest) error {
 	if req.Title == "" {
 		return fmt.Errorf("title is required")

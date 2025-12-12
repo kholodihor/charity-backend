@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DatabaseURL   string `mapstructure:"database_url"`
-	ServerAddress string `mapstructure:"server_address"`
+	DatabaseURL          string        `mapstructure:"database_url"`
+	ServerAddress        string        `mapstructure:"server_address"`
+	TokenSymmetricKey    string        `mapstructure:"token_symmetric_key"`
+	AccessTokenDuration  time.Duration `mapstructure:"access_token_duration"`
+	RefreshTokenDuration time.Duration `mapstructure:"refresh_token_duration"`
 }
 
 // Load reads configuration from config.yaml (if present) and environment variables.
@@ -34,6 +38,8 @@ func Load() (*Config, error) {
 
 	// Defaults
 	v.SetDefault("server_address", ":8080")
+	v.SetDefault("access_token_duration", "15m")
+	v.SetDefault("refresh_token_duration", "720h") // 30 days
 
 	// Load config file if present; it's optional
 	if err := v.ReadInConfig(); err != nil {
@@ -60,6 +66,22 @@ func Load() (*Config, error) {
 	}
 	if cfg.ServerAddress == "" {
 		cfg.ServerAddress = ":8080"
+	}
+	if cfg.TokenSymmetricKey == "" {
+		cfg.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
+		if cfg.TokenSymmetricKey == "" {
+			return nil, fmt.Errorf("token_symmetric_key / TOKEN_SYMMETRIC_KEY is required")
+		}
+	}
+
+	// Resolve durations from viper to allow string inputs such as "15m"
+	cfg.AccessTokenDuration = v.GetDuration("access_token_duration")
+	if cfg.AccessTokenDuration == 0 {
+		cfg.AccessTokenDuration = 15 * time.Minute
+	}
+	cfg.RefreshTokenDuration = v.GetDuration("refresh_token_duration")
+	if cfg.RefreshTokenDuration == 0 {
+		cfg.RefreshTokenDuration = 720 * time.Hour
 	}
 
 	return &cfg, nil

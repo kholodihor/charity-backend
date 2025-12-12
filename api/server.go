@@ -3,22 +3,30 @@ package api
 import (
 	"log"
 	"net/http"
+	"time"
 
 	db "charity/db/sqlc"
+	"charity/token"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	router *gin.Engine
-	store  *db.Store
+	router               *gin.Engine
+	store                *db.Store
+	tokenMaker           token.Maker
+	accessTokenDuration  time.Duration
+	refreshTokenDuration time.Duration
 }
 
-func NewServer(store *db.Store) *Server {
+func NewServer(store *db.Store, tokenMaker token.Maker, accessTokenDuration, refreshTokenDuration time.Duration) *Server {
 	r := gin.Default()
 	s := &Server{
-		router: r,
-		store:  store,
+		router:               r,
+		store:                store,
+		tokenMaker:           tokenMaker,
+		accessTokenDuration:  accessTokenDuration,
+		refreshTokenDuration: refreshTokenDuration,
 	}
 
 	s.registerRoutes()
@@ -50,4 +58,11 @@ func (s *Server) registerRoutes() {
 	goals.GET("", s.listGoals)
 	goals.GET(":id", s.getGoal)
 	goals.PATCH(":id", s.updateGoal)
+
+	users := s.router.Group("/users")
+	users.POST("", s.createUser)
+	users.POST("/login", s.loginUser)
+	users.GET("", s.listUsers)
+	users.GET(":id", s.getUser)
+	users.GET("/by-email", s.getUserByEmail)
 }
